@@ -7,14 +7,13 @@ Created on Sun Jun 17 09:34:19 2018
 
 import pyglet as pg
 from pyglet import gl
-from pyglet.window import key
-
-#Velikost okna
+from pyglet.window.key import DOWN, UP, W, S
+import random
 
 sirka = 900
 vyska = 600
 
-velmic = 25
+velmic = 18
 sirpalka = 10
 delpalka = 100
 rychlost = 200
@@ -24,8 +23,6 @@ delkapulcary = 20
 velfont = 40
 odsazenitextu = 30
 
- #potřebné proměnné
-
 pozpalek = [vyska // 2, vyska // 2]  # vertikalni pozice palek
 pozmic = [0, 0]  # souradnice micku 
 rychlostmic = [0, 0]   
@@ -33,7 +30,7 @@ stiskklavesy = set()  # sada stisknutych klaves
 skore = [0, 0]  # skore hracu
 
 
-window = pg.window.Window(width = sirka, height = vyska)
+
 #vykreslení hrací plochy
 
 def nakresli_obdelnik(x1, y1, x2, y2):
@@ -49,25 +46,17 @@ def nakresli_obdelnik(x1, y1, x2, y2):
 def vykresli():
     gl.glClear(gl.GL_COLOR_BUFFER_BIT)  # smaz obsah okna
     gl.glColor3f(1, 1, 1)  # barva kresleni - bila
-
-window = pg.window.Window(width = sirka, height = vyska)
-window.push_handlers(on_draw=vykresli)
-
-
-#vykreslení míčku
-  
-def vykresli():
-    ...
+    
+#vykreslení míče    
+    
     nakresli_obdelnik(
             pozmic[0] - velmic // 2,
             pozmic[1] - velmic // 2,
             pozmic[0] + velmic // 2,
             pozmic[1] + velmic // 2,)
-      
-#vykreslení pálek
     
-def vykresli():
-    ...
+#vykreslení pálek    
+    
     for x, y in [(0, pozpalek[0]), (sirka, pozpalek[1])]:
         nakresli_obdelnik(
                 x - sirpalka,
@@ -75,30 +64,17 @@ def vykresli():
                 x + sirpalka,
                 y + delpalka // 2,)
         
-#vykreslení pulící čáry
+#vykreslení pulící čáry        
         
-def vykresli():
-    ...
     for y in range(delkapulcary // 2, vyska, delkapulcary * 2):
         nakresli_obdelnik(
                 sirka // 2 - 1,
                 y,
                 sirka // 2 + 1,
                 y + delkapulcary)
-
-#vykreslení skóre
         
-def nakresli_text(text, x, y, pozice_x):
-    napis = pg.text.Label(
-            text,
-            font_size=velfont,
-            x=x, y=y, anchor_x=pozice_x)
-    napis.draw()
-    
-#nakreslení skóre
-    
-def vykresli():
-    ...
+#vykreslení skóre        
+        
     nakresli_text(
         str(skore[0]),
         x=odsazenitextu,
@@ -110,33 +86,105 @@ def vykresli():
         x=sirka - odsazenitextu,
         y=vyska - odsazenitextu - velfont,
         pozice_x='right')
+        
+        
+def nakresli_text(text, x, y, pozice_x):
+    napis = pg.text.Label(
+            text,
+            font_size=velfont,
+            x=x, y=y, anchor_x=pozice_x)
+    napis.draw()
     
 #klavesy
     
 def stisk_klavesy(symbol, modifikatory):
-    if symbol == key.W:
-        stiskklavesy.add(('nah', 0))
-    if symbol == key.S:
-        stiskklavesy.add(('dol', 0))
-    if symbol == key.UP:
-        stiskklavesy.add(('nah', 1))
-    if symbol == key.DOWN:
-        stiskklavesy.add(('dol', 1))
+    if symbol == W:
+        stiskklavesy.add(('nahoru', 0))
+    if symbol == S:
+        stiskklavesy.add(('dolu', 0))
+    if symbol == UP:
+        stiskklavesy.add(('nahoru', 1))
+    if symbol == DOWN:
+        stiskklavesy.add(('dolu', 1))
 
 def pusteni_klavesy(symbol, modifikatory):
-    if symbol == key.W:
-        stiskklavesy.discard(('nah', 0))
-    if symbol == key.S:
-        stiskklavesy.discard(('dol', 0))
-    if symbol == key.UP:
-        stiskklavesy.discard(('nah', 1))
-    if symbol == key.DOWN:
-        stiskklavesy.discard(('dol', 1))
+    if symbol == W:
+        stiskklavesy.discard(('nahoru', 0))
+    if symbol == S:
+        stiskklavesy.discard(('dolu', 0))
+    if symbol == UP:
+        stiskklavesy.discard(('nahoru', 1))
+    if symbol == DOWN:
+        stiskklavesy.discard(('dolu', 1))
+        
+#rychlost míče na začátku
+        
+def reset():
+    pozmic[0] = sirka // 2
+    pozmic[1] = vyska // 2
 
+    if random.randint(0, 1):
+        rychlostmic[0] = rychlost
+    else:
+        rychlostmic[0] = -rychlost
+
+    rychlostmic[1] = random.uniform(-1, 1) * rychlost
+        
+def obnov_stav(dt):
+    
+#pohyb pálek    
+    
+    for cislo_palky in (0, 1):
+        if ('nahoru', cislo_palky) in stiskklavesy:
+            pozpalek[cislo_palky] += rychpalka * dt
+        if ('dolu', cislo_palky) in stiskklavesy:
+            pozpalek[cislo_palky] -= rychpalka * dt
+
+        if pozpalek[cislo_palky] < delpalka / 2:
+            pozpalek[cislo_palky] = delpalka / 2
+        if pozpalek[cislo_palky] > vyska - delpalka / 2:
+            pozpalek[cislo_palky] = vyska - delpalka / 2
+            
+
+#pohyb míče
+            
+    pozmic[0] += rychlostmic[0] * dt
+    pozmic[1] += rychlostmic[1] * dt  
+    
+#odraz míče
+    
+    if pozmic[1] < velmic // 2:
+        rychlostmic[1] = abs(rychlostmic[1])
+    if pozmic[1] > vyska - velmic // 2:
+        rychlostmic[1] = -abs(rychlostmic[1])
+    
+    palka_min = pozmic[1] - velmic / 2 - delpalka / 2
+    palka_max = pozmic[1] + velmic / 2 + delpalka / 2
+    
+#odražení vlevo
+    
+    if pozmic[0] < sirpalka + velmic / 2:
+        if palka_min < pozpalek[0] < palka_max:
+            #palka odrazi mic
+            rychlostmic[0] = abs(rychlostmic[0])
+        else:
+            #palka je mimo a hrac prohral
+            skore[1] += 1
+            reset()
+
+#odražení vpravo
+    if pozmic[0] > sirka - (sirpalka + velmic / 2):
+        if palka_min < pozpalek[1] < palka_max:
+            rychlostmic[0] = -abs(rychlostmic[0])
+        else:
+            skore[0] += 1
+            reset()
+            
+pg.clock.schedule(obnov_stav)
 window = pg.window.Window(width=sirka, height=vyska)
 window.push_handlers(
     on_draw=vykresli,  # na vykresleni okna pouzij funkci `vykresli`
-    on_key_press=stiskklavesy,
+    on_key_press=stisk_klavesy,
     on_key_release=pusteni_klavesy)
 
 pg.app.run()
