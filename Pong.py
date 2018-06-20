@@ -27,7 +27,7 @@ pozpalek = [vyska // 2, vyska // 2]  # vertikalni pozice palek
 pozmic = [0, 0]  # souradnice micku 
 rychlostmic = [0, 0]   
 stiskklavesy = set()  # sada stisknutych klaves
-skore = [0, 0]  # skore hracu
+skore = [0, -1]  # skore hracu
 
 
 
