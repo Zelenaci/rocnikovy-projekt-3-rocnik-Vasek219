@@ -45,7 +45,7 @@ def nakresli_obdelnik(x1, y1, x2, y2):
 ...
 def vykresli():
     gl.glClear(gl.GL_COLOR_BUFFER_BIT)  # smaz obsah okna
-    gl.glColor3f(1, 1, 1)  # barva kresleni - bila
+    gl.glColor3f(255,255,255)  # barva kresleni - bila
     
 #vykreslení míče    
     
@@ -91,6 +91,8 @@ def vykresli():
 def nakresli_text(text, x, y, pozice_x):
     napis = pg.text.Label(
             text,
+            color=(204, 51, 0,255),
+            bold=True,
             font_size=velfont,
             x=x, y=y, anchor_x=pozice_x)
     napis.draw()
